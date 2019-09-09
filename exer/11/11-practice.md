@@ -17,7 +17,7 @@
 
 # 3&4
 
-exer11_4.cpp
+https://github.com/imshenzhuo/CppPrimer/blob/master/exer/11/exer11_4.cpp
 
 # 5 
 
@@ -33,7 +33,7 @@ exer11_4.cpp
 
 # 7 
 
-exer11_7.cpp
+https://github.com/imshenzhuo/CppPrimer/blob/master/exer/11/exer11_7.cpp
 
 # 8
 
@@ -43,7 +43,7 @@ exer11_7.cpp
 
 > Define a map that associates words with a list of line numbers on which the word might occur
 
-exer11_9.cpp
+https://github.com/imshenzhuo/CppPrimer/blob/master/exer/11/exer11_9.cpp
 
 # 10
 
@@ -55,7 +55,7 @@ exer11_9.cpp
 
 > Write a program to read a sequence of strings and ints, storing each into a pair. Store the pairs in a vector.
 
-exer11_12.cpp
+https://github.com/imshenzhuo/CppPrimer/blob/master/exer/11/exer11_12.cpp
 
 # 13
 
@@ -111,7 +111,7 @@ pair<map<string, vector<int>>::iterator, bool>
 
 # 23 
 
-> Rewrite the map that stored vectors of children’s names with a key that is the family last name for the exercises in § 11.2.1 (p. 424) to use a multimap.
+> Rewrite the map that stored vectors of children’s names with a key that is the family last name for the exer in § 11.2.1 (p. 424) to use a multimap.
 
 # 24
 
@@ -135,7 +135,7 @@ key的类型，返回value的类型，即mapped_type对象
 
 # 33
 
-exer11_33.cpp
+https://github.com/imshenzhuo/CppPrimer/blob/master/exer/11/exer11_33.cpp
 
 # 34
 
@@ -161,4 +161,4 @@ exer11_33.cpp
 
 # 38 
 
-exer11_38.cpp
+https://github.com/imshenzhuo/CppPrimer/blob/master/exer/11/exer11_38.cpp
