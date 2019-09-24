@@ -6,6 +6,8 @@
  ************************************************************************/
 
 #include<iostream>
+#include <algorithm>
+#include <string>
 using namespace std;
 
 using pos = std::string::size_type;
@@ -17,8 +19,8 @@ template <pos H, pos W> std::ostream& operator<<(std::ostream&, const Screen<H, 
 
 
 template <pos H, pos W> class Screen {
-    friend std::istream& operator>>(std::istream&, Screen<H, W>&);
-    friend std::ostream& operator<<(std::ostream&, const Screen<H, W>&);
+    friend std::istream& operator>><H, W>(std::istream&, Screen<H, W>&);
+    friend std::ostream& operator<<<H, W>(std::ostream&, const Screen<H, W>&);
 public: 
     Screen() = default;
     Screen(char c) : contents(H * W, c) {}
@@ -32,7 +34,7 @@ public:
         return *this;
     }
     
-    Screen &set(char c) {
+    Screen &set(char ch) {
         contents[cursor++] = ch;
         cursor = std::min(cursor, H * W);
         return *this;
@@ -64,18 +66,13 @@ std::ostream& operator<<(std::ostream& os, const Screen<H, W>& s)
     return os;
 }
 
+int main()
+{
+    Screen<5, 5> screen('x');
+    screen.set('o');
+    std::cout << screen << std::endl;
 
-int main() {
-    /*
-    Screen s(24, 12,'*');
-    Screen s1 = s;
-    s.print(cout, s);
-    s1.print(cout, s1);
-    */
-    Screen<std::string> myScreen(5, 5, 'X');
-    myScreen.move(4, 0).set('#').display(cout);
-    cout << endl;
-    myScreen.display(cout);
-    cout << endl;
-    
+    std::cout << "please input some characters as you like:";
+    std::cin >> screen;
+    std::cout << screen << std::endl;
 }

@@ -1,6 +1,6 @@
 # 1
 
-编译时期,编译器根据函数调用分析处函数类型,生成对应的函数
+编译时期,编译器根据函数调用分析处函数类型,生成对应的代码
 
 # 2 [exer16_2.cpp](./exer16_2.cpp)
 
@@ -72,3 +72,59 @@ private:
 > Explain which kind of friendship you chose for the equality and relational operators for BlobPtr.
 
 只有相同类型才有比较的意义,所以关系自然是一对一
+
+# 14 [exer16_14.cpp](./exer16_14.cpp)
+
+> Write a Screen class template that uses nontype parameters to define the height and width of the Screen.
+
+# 16 [exer16_16.cpp](./exer16_16.cpp)
+
+> Rewrite the StrVec class (§ 13.5, p. 526) as a template named Vec.
+
+
+
+# 18
+
+a. ×
+b. 错
+c. 错
+d. 错
+e. 错
+
+
+
+# 25 
+
+> explain 
+>
+> ```cpp
+> extern template class vector<string>;
+> template class vector<Sales_data>;
+> ```
+
+第一行是实例化声明, 表示别的地方实例化了, 此处不用实例化
+第二行是实例化定义, 表示就在此处实例化
+
+# 26
+
+https://stackoverflow.com/questions/21525169/while-explicitly-instantiating-vectorsometype-what-is-the-sometype-default-co
+
+# 27 
+
+> For each labeled statement explain what, if any, instantiations happen. If a template is instantiated, explain why; if not, explain why not.
+
+``` cpp
+emplate <typename T> class Stack { };
+void f1(Stack<char>);                   // (a)
+class Exercise {
+    Stack<double> &rsd;                 // (b)
+    Stack<int>    si;                   // (c)
+};
+int main() {
+    Stack<char> *sc;                    // (d)
+    f1(*sc);                            // (e)
+    int iObj = sizeof(Stack< string >); // (f)
+}
+```
+
+编译, 引用, 指针不需要实例化 `cef`处发生了实例化
