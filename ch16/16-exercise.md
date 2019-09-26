@@ -128,3 +128,49 @@ int main() {
 ```
 
 编译, 引用, 指针不需要实例化 `cef`处发生了实例化
+
+
+
+# 32
+
+可能发生类型转换
+
+# 33
+
+1. 关于const, 模板是const类型, 实参是非const类型
+2. 数组或者指针转换
+
+# 34
+
+1. 不合法 
+2. 合法  `const char (&)[4]`
+
+# 35
+
+1. 合法 char
+2. 合法 double
+3. 合法 char
+4. 不合法
+
+# 36
+
+1. `f1(int*, int*)`
+2. `f2(int*, int*)`
+3. `f1(const int*, const int *)`
+4. `f2(const int*, const int *)`
+5. error
+6. `f2(int*, const int*)`
+
+# 37 [exer16_37.cpp](./exer16_37.cpp)
+
+不能直接使用, 要显式指定
+
+    int a = 6; 
+    double b = 6.1231;
+    cout << max<int>(a, b) << endl;
+ 
+
+# 38
+
+不要为难编译器
+
