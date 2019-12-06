@@ -1,31 +1,38 @@
-内置类型、自定义类型的机制
+语言的最基本特征
+
+- 内置类型&变量
+- 表达式&语句
+- if while控制流
+- 函数
 
 # 第二章 变量和基本类型
 
 > **Types** are fundamental to any program: They tell us what our data **mean** and what **operations** we can perform on those data.
 
-## 2.1 原始的内置类型
+- 内置类型
+- 初步了解c++如何支持更复杂的数据类型
+
+## 2.1 基本内置类型
+
+基本内置类型包括
+
+- 算术类型: int float等
+- 空类型: `nullptr`
 
 ### 2.1.1 算数类型
 
 算数类型包括整型和浮点型，cpp标准规定了各个类型占用的最小位数
 
-#### signed unsigned
+#### signed/unsigned
 
-哪些类型区分有无符号？整型除了bool和扩展char类型外，都区分有/无符号
+哪些类型区分有无符号? 整型**除了bool和扩展char类型**外，都区分有/无符号
 
-char是signed还是unsigned取决于编译器
+**char是signed还是unsigned取决于编译器**
 
 选择类型Tips
 
-- 选double：float和double花销忽略不计，float往往精度不够 long double没必要
-- 用int：short太短，long又往往和int一样，如果不够用long long
-
-#### 问题
-
-@CSAPP
-int short long 区别
-double float只是位数不同吗
+- 用`int`:`short`太短，long又往往和int一样，如果不够用long long
+- 选`double` : `double`花销不一定比`float`大, float往往精度不够 long double没必要
 
 ### 2.1.2 类型转换
 
@@ -33,7 +40,7 @@ double float只是位数不同吗
 
 ``` C
 unsigned char c1 = -1; // 255
-signed char c2 = 256; // 0
+signed char c2 = 256; // 0 or 未定义(看操作系统)
 // sizeof(1) = 4字节
 // 这种赋值时候的做法像是直接截断
 ```
@@ -47,7 +54,7 @@ unsigned类型永远都会大于等于零
 #### 计算时
 
 一般来讲是向上转换，尽量不丢失信息
-**当一个有符号一个无符号，有符号转为无符号型**
+**当一个有符号一个无符号，有符号转为无符号型** 所以根据这个可以得出无符号的最大值是多少
 
 ``` C
 unsigned u = 10;
@@ -56,37 +63,56 @@ cout << u + i << endl;
 // i 先转换为无符号型，之后在相加
 ```
 
-### 2.1.3 常量
+### 2.1.3 字面值常量
 
 常量的类型都是什么？
 
-常量的类型由前后缀显式决定
-注意到：对于浮点数 L是long double 默认double f是float
+常量的类型由前后缀显式决定, 前缀主要针对字符(串), 后缀针对数值
 
-#### 其他
+- L => long
+- LL => long long
+- f => float
+- U => unsigned
+- 注意到：对于浮点数 L是long double 默认double f是float
+
+#### bool字面值和指针字面值
 
 true false nullptr
 
 ## 2.2 变量
 
-A variable provides us with named storage that our programs can manipulate.
+> A variable provides us with named storage that our programs can manipulate.
 
 ### 2.2.1 变量定义
 
 #### 初始化和赋值
 
-初始化是在创建对象时给该对象value，赋值是要覆盖原来的value，在C++中真的有很大的区别吗？
+初始化是在**创建对象时**给该对象value，赋值是要**覆盖原来**的value，这在C++中真的有很大的区别(eg 隐式调用拷贝构造函数的一定要是初始化才行)
 
-#### list 初始化
+#### 列表初始化 `C++11`
 
-@
+``` c++
+int unit_sold = 0;
+int unit_sold = {0};
+int unit_sold{0};
+int unit_sold(0);
+```
+
+当存在**丢失信息**风险的时候, 编译器不答应
+
+``` c++
+int f{3.14}; // error
+int f = {3.14}; // error
+```
+
+
 
 #### 默认初始化 =》 没有显式初始化
 
-默认值取决于变量的类型和定义的位置
+默认值取决于变**量的类型**和**定义的位置**
 
-当变量定义在函数外时，会被初始化为0，在函数内时，随机数，正常访问
-（书上说是未初始化类型，访问会Error……）
+当内置类型变量定义在函数外时，会被初始化为0，在函数内时，随机数，正常访问
+
 
 ### 2.2.2 变量的声明和定义
 
