@@ -105,10 +105,6 @@ int f{3.14}; // error
 int f = {3.14}; // error
 ```
 
-
-
-#### 默认初始化 =》 没有显式初始化
-
 默认值取决于变**量的类型**和**定义的位置**
 
 当内置类型变量定义在函数外时，会被初始化为0，在函数内时，随机数，正常访问
@@ -116,23 +112,40 @@ int f = {3.14}; // error
 
 ### 2.2.2 变量的声明和定义
 
-为了分离编译，C++区分变量的声明和定义，声明是告诉程序别处有这个变量，定义是让程序弄出个实体来
+为了分离编译，C++区分变量的声明和定义, 定义只有一次, 但是声明可以有多次
+
+- **声明规定变量的类型和名字**
+- **定义申请存储空间, 并可能赋值**
 
 ```C
 extern int j; // 声明
 int i; // 定义
-extern double pi = 3.14; // 定义  覆盖外部的变量 
+extern double pi = 3.14; // 定义  显式初始化抵消了extern的作用
 ```
 
 ### scope
 
-相同变量名在不同的scope可以有多个定义，内嵌的变量会屏蔽外层的变量，除非有特定的目的，不然不建议这样使用
+相同变量名在不同的scope可以有多个定义，内嵌的变量会**屏蔽外层的变量**，除非有特定的目的，不然不建议这样使用
+
+``` c++
+int reuse = 42;
+int main()
+{
+    int reuse = 24;
+    cout << reuse << endl; // 24
+    cout << ::reuse << endl; // 42
+}
+```
+
+
 
 ## 2.3 复合类型
 
-A compound type is a type that is defined in terms of another type.引用和指针就是两种复合类型
+> A compound type is a type that is defined in terms of another type.引用和指针就是两种复合类型
 
 ### 2.3.1 引用
+
+> 严格来说是左值引用
 
 ```C
 int refVal = 2;
@@ -144,7 +157,7 @@ int &refVal2 = refVal3; // 2rd alias
 
 #### 空指针
 
-- **nullptr**
+- **nullptr** c++11
 - 0
 - NULL #include<cstdlib>
 
@@ -160,25 +173,28 @@ r = &i;
 
 第三行从右往左读，`&r`代表是一个引用，`int *`代表一个整型指针的引用，所以最后r就是p的引用，就是p的第二个名字，就有了后面两行
 
-### 问题
+**引用和指针到底有什么不同**
 
-1. 还有哪些复合类型
-2. 引用和指针到底有什么不同
-   1. 指针本身是一个object，引用不是
-   2. 指针可以被赋值被复制，引用是一次性绑定
-   3. 指针不用初始化定义，引用一定要初始化
+1. 指针本身是一个object，引用不是
+2. 指针可以被赋值被复制，引用是一次性绑定
+3. 指针不用初始化定义，引用一定要初始化
+
+##### void *
+
+- 可以存放任何对象的地址
+- 不能直接操作`void *`指针所指的对象
 
 ## 2.4 const 限定符
 
 const 修饰的变量必须定义时初始化，如果不初始化，也行，extern
 
 ``` C
-extern const int bufSize;
+extern const int bufSize; // 在多个文件之间共享const对象
 ```
 
+### 2.4.1 const的引用
 
-
-### 2.4.1 const类型的引用
+把引用绑定到常量对象
 
 #### 定义
 
@@ -189,35 +205,40 @@ r1 = 43; // Error
 int &r2 = ci; // Error
 ```
 
-存在绑定引用类型不匹配情况：可以绑定一个**const**引用到一个非const对象，常量 或者表达式
+引用类型和被引用对象类型不一致的特例: 可以用任意非const对象，常量 或者表达式**初始化常量引用**
 
-```C
-double dval = 3.14;
+```C++
+int i = 42;
+const int &r1 = i; // 用非const对象初始化常量引用
+const int &r2 = 42; // 用常量来初始化常量引用
+const int &r3 = r1 * 2; // 用任意表达式来初始化常量引用
+int &r4 = r1 * 2; // Error
+```
+为什么类型不一致就可以引用呢?
+``` c++
+double dval = 3.14; 
 const int &ri = dval; // pass
 // ri => 3
 int &ri = dval; // error
 ```
 
-为什么一定要是const呢？
+实际上是这样
 
 ```C
 const int temp = dval;
 const int &ri = temp;
 ```
 
-如果没有const，ri可以修改，那么ri修改的实际是是temp，dval没有变，这显然违背了引用的原意，是不合适的
+所以就会产生以下现象
 
-用const修饰的引用，去引用一个没用const的变量有什么用呢
-
-```C
-int i = 43;
-int &r1 = i;
-const int &r2 = i;
-r1 = 0;
-r2 = 0; //error
+``` c++
+double dval = 3.14;
+const double &r1 = dval;
+const int &r2 = dval;
+cout << &rr << "," << &rr2 << "," << &dval << endl; // &dval == &r1 != &r2
 ```
 
-该引用对object只读，但是object可以通过别的引用写
+
 
 ### 2.4.2 指针和引用
 
@@ -226,53 +247,58 @@ const double pi = 3.14;   //pi is const; its value may not be changed
 double *ptr = &pi;        //error: ptr is a plain pointer
 const double *cptr = &pi; //ok: cptr may point to a double that is const
 *cptr = 42;               //error: cannot assign to *cptr
+// ----------------------------
 int errNumb = 0;
 int *const curErr = &errNumb;  // curErr will always point to errNumb
 const double pi = 3.14159;
 const double *const pip = &pi; // pip is a const pointer to a const object
 ```
 
+注意区分
 
-
-#### 注意
-
-``` C
-const int &r = 0; // pass
-int &r = 0; // error
-double dval = 3.14;
-const int &ri = dval;
-// ri => 3
-int &ri = dval; //error
-```
-
-
+- 指向常量的指针: `const int *` 指针指向的内容不能改变 low-level
+- 常量指针 `int *const` 指针**本身**的内容(地址)不能改变 top-level
 
 ### 2.4.3 Top-Level const
 
 ```Cpp
 int i = 0;
 int *const p1 = &i;  // we can't change the value of p1; const is top-level
-
 const int ci = 42;   // we cannot change ci; const is top-level
 const int *p2 = &ci; // we can change p2; const is low-level
-
 const int *const p3 = p2; // right-most const is top-level, left-most is not
 const int &r = ci;  // const in reference types is always low-level
 ```
 
-`const`关键字限定自己不能改变的就是top-level，否则就是low-level，当复制一个对象的时候，top-level忽略，low-level不能忽略
+`const`关键字限定自己不能改变的就是top-level，否则就是low-level，当复制一个对象的时候，top-level忽略，**low-level不能忽略** , 当前对象不能该别人的(const指针和所有引用)就是底层const
 
 > low-level 不同，类型不同，如果不能通过convert，就会Error
 
 ### 2.4.4 常量表达式
 
 - 初始化定义常量
-- 编译时确定
+- 编译时就得到计算结果
 
-#### constexpr 变量
+``` c++
+const int max_files = 20; // constexep
+const int limit = max_files + 1; // constexep
+int staff_size = 27; // not
+const int sz = get_size();; // not
+```
 
-Variables declared as constexpr are implicitly const and must be initialized by constant
-expressions
+是不是常量表达式由数据类型和初识值一起决定.
+
+#### constexpr 变量 c++11
+
+使用constexpr声明的变量是使用常量表达式的常量
+
+``` c++
+constexpr int mf = 20;
+constexpr int limit = mf + 1;
+constexpr int sz = size(); // if function is constexpr
+```
+
+**constexpr和指针**
 
 ```Cpp
 const int *p = nullptr;     // p is a pointer to a const int p是指向int常量的指针
@@ -281,7 +307,7 @@ constexpr int *q = nullptr; // q is a const pointer to int q是指向int的常�
 
 区别非常大，constexpr在对象上组成了一个top-level const，所以p可以指向另一个const int类型的变量，但是q是top-level，不能改，只能初始化定义死了。
 
-## 2.5 Dealing with Types
+## 2.5 处理类型
 
 ### 2.5.1 类型别名
 
@@ -290,6 +316,9 @@ constexpr int *q = nullptr; // q is a const pointer to int q是指向int的常�
 ``` cpp
 typedef double wages; // wages => double
 typedef wages base, *p; // base => double  p=>double *
+
+typedef char *pstring;
+const pstring cstr = 0; // cstr是=> char *const cstr
 ```
 
 新方法
@@ -299,7 +328,7 @@ typedef wages base, *p; // base => double  p=>double *
 using sufu = wages;
 ```
 
-### 2.5.2 auto
+### 2.5.2 auto c++11
 
 cpp11 auto ordinarily ignores top-level consts.
 
@@ -323,56 +352,29 @@ auto &n = i, *p2 = &ci;
 
 ### 2.5.3 decltype
 
-和auto类似，让编辑器猜类型的
+和auto类似，让编辑器猜类型的, 和auto不同的是, decltype不会忽略顶层const信息
 
 ```cpp
 const int ci = 0, &cj = ci;
 decltype(ci) x = 0; // x has type const int
 decltype(cj) y = x; // y has type const int& and is bound to x
 decltype(cj) z;     // error: z is a reference and must be initialized
+
+decltype((c)) xx = x; // 带括号的代表引用
 ```
 
 ## 2.6 写自己的类型
 
 ### 2.6.2 写自己的Header文件
 
-Header包含entities
+使用
 
-- class定义
-- const类型
-- constexpr类型
+``` c++
+#ifndef XXX
+#define XXX
+#include <string>
+....
+#endif
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# 问题
-
-2.15 为什么cpp对`int ival = 1.1`不报错
-
-2.16 自动转换
-
-
-
+确保只加载一次
