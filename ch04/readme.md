@@ -3,24 +3,24 @@
 ## 4.1 基础
 
 > An **expression** is composed of one or more **operands** and yields a **result** when it is evaluated.
+> 表达式 = 运算符 + 运算对象 + 结果
 
 ### 4.1.1 基本概念
 
 - 一元二元三元操作符 
-- 操作符的优先级和关联性
+- **操作符**的优先级和结合率
 - 表达式里的类型转换
 - 操作符重载 @计算万年历之间的天数
 - 左值和右值
 
-#### lvalue rvalue ※※ 看不懂……
+#### lvalue rvalue 
 
-> lvalues could stand on the left-hand side of an assignment whereas rvalues could not.
+C语言中, 左值可以位于赋值语句的左侧, 右值不行.
 
-不是简单的在左在右，而是说可以不可以在等号左边
+- 当一个对象被用作右值的时候, 用的是对象在内存中的**值**
+- 当一个对象被用作左值的时候, 用的是对象在内存中的**位置**
 
-> Roughly speaking, when we use an object as an rvalue, we use the object’s value (its contents). When we use an object as an lvalue, we use the object’s identity (its location in memory).
-
-### 4.1.2 优先级和关联
+### 4.1.2 优先级和结合率
 
 Because of precedence, the expression 3+4*5 is 23, not 35.
 
@@ -54,7 +54,7 @@ bool b2 = -b; // b2 is true!
 
 ## 4.3 逻辑和关系操作符
 
-由于关系操作符是左联系的
+由于关系操作符是**左联系**的
 
 ``` cpp
 // oops! this condition compares k to the bool result of i < j
@@ -63,7 +63,7 @@ if (i < j < k) // true if k is greater than 1!
 if (i < j && j < k) { /* ...  */ }
 ```
 
-bool的坑
+`bool`的坑
 
 ``` cpp
 if (val) { ... }  // val 非零执行
@@ -103,21 +103,31 @@ string finalgrade = (grade > 90) ? "high pass"
 
 三元操作符优先级很低，记得加上括号
 
+``` C++
+cout << ((grade < 60) ? "fail" : "pass"); // correct
+cout << (grade < 60) ? "fail" : "pass"; // cout 1 or 0
+cout << grade < 60 ? "fail" : "pass"; // error try to cmp cout and 60
+```
+
 条件操作符是右联的，cin cout是左链接的
 
 ## 4.8 bit 操作
 
 ## 4.9 sizeof
 
+返回一个`size_t`的常量表达式, 并且表达式不参与实际运算
+
 ``` cpp
 sizeof(type);
 sizeof expr;
-// 返回常量表达式
+sizeof (expr);
 ```
 
-`sizeof(arr)`返回数组的字节大小，`sizeof(vec)`就不是了
+`sizeof(arr)`返回整个在stack中数组的字节大小，sizeof 动态分配就不是了
 
 ## 4.10 逗号
+
+规定了求值顺序, 从左到右
 
 ## 4.11 类型转换
 
@@ -125,14 +135,13 @@ sizeof expr;
 int ival = 3.54 + 1;
 ```
 
-算术类型的转换是为了保留精度，首先int类型转换为浮点型，然后相加得到一个浮点型结果，最后转换为初始化的类型`4`
+算术类型的转换是为了保留精度，首先int类型(等号右边的`1`)转换为浮点型，然后相加得到一个浮点型结果，最后转换为初始化的类型`4`
 
 隐式类型转换发生
 
-- d
-- d
-- d
-- d
+- 条件语句中, 非bool转换bool
+- 初始化和赋值, 右侧转换为左侧类型
+- 算术运算关系运算转换为一种类型
 
 ### 4.11.1 算术转换
 
@@ -140,11 +149,62 @@ int ival = 3.54 + 1;
 
 int + unsigned 的时候要注意
 
-### 4.11.2 显式转换
+### 4.11.2 其他隐式转换
 
-- static_cast
-- const_cast
-- reinterpret_cast
+``` c++
+int ia[10];
+// ia转换成指向数组第一个元素的指针
+int *ip = ia;
+```
 
+### 4.11.3 显式转换
 
+``` C++
+cast-name<type>(expr)
+```
+
+#### static_cast
+
+只要不包含low-level const的类型, 都可以`static_cast` 
+
+``` C++
+int i,j;
+double slope = static_cast<double>(j) / i;
+```
+
+编译器无法自动执行的类型转换
+
+``` C++
+double d = 3.14;
+void *p = &d;
+double *dp = static_cast<double*>(p);
+```
+
+#### dynamic_cast
+
+Chapter 19 运行时类型识别
+
+#### const_cast
+
+**只能**改变运算对象的**底层**`const`
+
+``` C++
+int i = 99;
+const int *p = &i;
+// *p = -99;// error
+int *newp = const_cast<int *>(p);
+*newp = -99;
+```
+
+#### reinterpret_cast
+
+要对机器很懂
+
+#### 旧制的强制转换
+
+四合一
+
+``` C
+(type) expr;
+```
 
