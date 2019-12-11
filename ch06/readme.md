@@ -120,13 +120,28 @@ string screen (sz, sz, char = '*'); // error
 string screen (sz = 24, sz = 80, char); 
 ```
 
+### 6.5.2 内联函数&constexpr函数
 
+向编译器请求在该函数调用处展开, 省去函数开销, 不过编译器可以忽略请求.
 
-#### 内联函数
+- 函数返回类型和所有形参类型都是字面值类型
+- 函数体只能有一个`return`语句
+- 隐式内联
 
-省去函数开销，编译时直接搞到调用点
+内联函数和constexpr函数通常定义在头文件中
 
+### 6.5.3 调试帮助
 
+#### assert
 
+``` C
+assert(expr);
+```
 
+如果表达式为真, 什么都不做, 如果表达式假, 输出信息停止程序.
 
+assert行为依赖于`NDEBUG`预处理变量, 如果定义assert就无效, 所以关闭`assert`选项的方法就是定义`NDEBUG`
+
+``` bash
+$CC -D NDUBUG main.c
+```
