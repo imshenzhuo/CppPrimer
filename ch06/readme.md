@@ -104,6 +104,27 @@ decltype(odd) *func2(int i) {
 
 ※ Top-level low-level
 
+一个拥有顶层const的形参无法和另一个没有顶层const的形参区分开来
+
+``` C++
+Record lookup(Phone);
+Record lookup(const Phone);
+Record lookup(Phone*);
+Record lookup(Phone *const);
+```
+
+一个带底层const的形参可以和另一个没有带底层const的形参区分开
+
+``` C++
+Record lookup(Account&);
+Record lookup(const Account&);
+
+Record lookup(Account*);
+Record lookup(const Account*);
+```
+
+
+
 ### 6.4.1 重载和作用域
 
 函数声明当然不能放到局部作用域啊，这样做有屏蔽的作用，除非有特殊用途
