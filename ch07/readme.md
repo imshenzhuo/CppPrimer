@@ -106,9 +106,17 @@ double Sales_data::avg_price() const {
 - 没有返回值
 - 不能是const
 
+如果有其他方式的构造函数, 编译器不会自动生成默认构造函数.
+
+``` C++
+// 既需要默认构造函数又需要其他构造函数 C++11
+Sales_data() = default;
+```
+
+
+
 ``` cpp
 // 构造函数声明
-Sales_data() = default;
 Sales_data(const string &s) : bookNo(s) {	}
 Sales_data(const string &s, unsigned n, double p) : bookNo(s), units_sold(n), revenue(p*n) {}
 Sales_data(istream &is);
@@ -146,9 +154,31 @@ friend std::istream &read(std::istream&, Sales_data&);
 
 ### 7.3.1 再看类成员
 
-类内的成员函数自动内联，定义在外部的函数，想要内联就要在类内中的声明显式声明`inline` 
+通过定义相关类`Screen`和`Window_mgr`说明
+
+``` C++
+class Screen {
+    public:
+    	typedef std::string::size_type pos;
+    private:
+    	pos cursor = 0;
+    	pos height = 0, width = 0;
+    	std::string contents;
+};
+```
+
+**类型别名也有访问权限**
+
+#### 成员函数内联
+
+1. 成员函数定义在类定义内部隐式内联
+2. 成员函数在类声明或者外部定义时候显式`inline`
+
+内联函数应该和相应的类定义在同一个头文件中
 
 #### 可变数据成员
+
+`mutable`修饰的变量永远不是`const`
 
 ``` cpp
 // 无视 const 函数
@@ -157,28 +187,67 @@ mutable size_t access_ctr;
 
 #### 基于const的重载
 
-#### 返回`*this`的成员函数
+函数重载可以区分底层`const`, 所以当可以根据类成员函数是否是`const`(函数的隐式参数)来重载
+
+``` C++
+class Screen{
+public:
+    Screen &display(std::ostream &os) {
+        do_display(os);
+        return *this;
+    }
+    const Screen &display(std::ostream &os) const {
+        do_display(os);
+        return *this;
+    }
+};
+```
+
+很多代码都是这样, `display`包装`do_display`
+
+- 随着规模的发展, `display`可能变得越来越复杂
+- 在开发过程可以在`do_display`增加调试信息, 一处修改处处生效
+- 由于内联并且不会增加函数开销
 
 ### 7.3.3 类类型
+
+``` c++
+class Screen;
+```
 
 不完全类型：声明之后，定义之前
 
 不完全类型的使用
 
-- 该类型的指针做该类型的成员
-- 该类型做该类的静态成员
+1. 定义指向该类的指针和引用
+2. 声明以不完全类型作为形参或者返回值的函数
 
 ### 7.3.3 再看友元
 
 ``` cpp
 class Screen{
-  friend class Window_mgr;  
+    friend class Window_mgr;  
+    friend void Window_mgr::clear(ScreenIndex);
 };
 ```
 
 `Window_mgr`是`Screen`的朋友，可以访问Screen的所有成员，但是朋友的朋友，不是朋友
 
-友元的声明、定义和使用的顺序有点复杂和麻烦
+必须在类的外部提供相应的声明从而使得函数可见
+
+``` C++
+struct x{
+    friend void f() { /**/ }
+    X() { f(); } // error f没有被声明
+    void g();
+    void h();
+};
+// 外部
+void X::g() { return f(); } // error
+void f();		// 声明定义在X的函数
+void X::h() {return f();}	//正确
+
+```
 
 
 
@@ -188,23 +257,9 @@ class Screen{
 
 ## 7.5 再看构造函数
 
-cpp的典型构造函数和Java相比，区别在于cpp是初始化，Java是定义+赋值，也不知道有什么具体差别
+### 7.5.1 构造函数初始化列表
 
-``` cpp
-// pass
-class ConstRef{
-	public:
-		ConstRef(int ii) : i(ii), ci(ii), ri(i) {	}
-	private:
-		int i;
-		const int ci;
-		int &ri;
-};
-```
-
-
-
-
+构造函数中的冒号是让成员变量初始化, 而函数体内部是定义后赋值
 
 ## 7.6 类的静态成员
 
