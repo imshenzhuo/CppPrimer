@@ -37,11 +37,12 @@ cout << compare(1, 0) << endl;       // T is int
 - 类型参数
 - 非类型参数
 
-#### 模板类型参数
+#### 模板中的类型参数
 
 上面代码中模板的参数就是类型参数,该参数`T`代表一个类型,所以在前面必须要加 `class` 或者 `typename`
+在模板类型参数中, 两者没有什么不同
 
-#### 模板非类型参数
+#### 模板中的非类型参数
 
 还有一种模板的参数叫非类型参数, 也就是说模板里面的参数代表的不是类型而是一个值, 比如指定数组大小,但是必须是**常量表达式** 
 
@@ -77,7 +78,6 @@ int compare(const char (&p1)[3], const char (&p2)[4])
 > void f1(Stack<char>);
 > ```
 >
-> 
 
 ### 16.1.2 类模板
 
@@ -134,22 +134,20 @@ Blob<double> prices;// different element type
 
 #### 类模板的函数成员
 
-##### 注意
+**注意**
 
  - `Blob<T>`才是类型名
  - `Blob`是模板名
 
-在类外定义函数和普通成员函数定义有所不同
+在类外**定义函数**和普通成员函数定义有所不同
 
 ``` cpp
 template <typename T>
 ret-type Blob<T>::member-name(parm-list)
 ```
 
-只有两处变化
-
-- 加上模板声明(不同的类生成不同的函数)
-- 作用域变成 `Blob<T>` (区分不同的作用域嘛)
+1. 加上模板声明(不同的类生成不同的函数)
+2. 作用域变成 `Blob<T>` (类名嘛!)
 
 #### 类模板的构造函数
 
@@ -162,19 +160,27 @@ Blob<T>::Blob():data(std::make_shared<std::vector<T>>()) {}
 
 #### 类模板成员函数实例化
 
-首先实例化一个类, 然后该类调用成员函数, 该成员函数才会实例化
+成员函数只有使用时才会被实例化
 
-#### 不必提供实参
+#### 类模板作用域内的简化
 
-``` cpp
-// postfix: increment/decrement the object but return the unchanged value
+类模板内, 不需要`A<T>`
+
+``` C++
 template <typename T>
-BlobPtr<T> BlobPtr<T>::operator++(int)
-{
-    // no check needed here; the call to prefix increment will do the check
-    BlobPtr ret = *this;  // save the current value
-    ++*this;    // advance one element; prefix ++ checks the increment
-    return ret;  // return the saved state
+class A{
+  A& operator++();  
+};
+```
+
+类模板外的定义, 不需要`A<T>`
+
+``` C++
+template <typename T>
+A<T> A<T>::operator++(int) {
+    A ret = *this;
+    ++*this;
+    return ret;
 }
 ```
 
@@ -221,7 +227,18 @@ template <typename T> class C2 { // C2 is itself a class template
 
 除了一对一还有一对多, 多对多的情况, 总之区分模板名和类名就清楚了.
 
-### 16.1.3 模板参数
+#### 模板类型别名 C++11
+
+``` C++
+template <typename T> using twin = pair<T, T>;
+twin<string> authors; //  pari<string, string> author;
+template <typename T> using partNo = pair<T, unsigned>;
+partNo<string> books; // pair<string, unsigned>
+```
+
+
+
+### 16.1.3 模板的参数
 
 #### 模板参数和作用域
 
@@ -237,6 +254,8 @@ template <typename A, typename B> void f(A a, B b)
 ```
 
 #### 使用类的类型成员
+
+当访问模板类的类型成员时, 要用`typename` eg ` typename T::class_member`, 注意是全程都要不只是返回类型
 
 ``` cpp
 template <typename T>
@@ -267,9 +286,26 @@ template <class T =int> class Foo {
 
 ### 16.1.4 成员模板
 
-类(普通/模板)中的成员是个函数模板.
+类(普通/模板)中的成员是模板.
 
-同样, 再怎么也是类模板或者是函数模板, 当在外定义的时候, 先声明类的参数列表, 再声明函数的列表
+#### 普通类的成员模板
+
+#### 模板类的成员模板
+
+当在外定义的时候, 先声明类的参数列表, 再声明函数的列表
+
+``` C++
+// 类外定义
+template <typename T> // 类的类型
+	template <typename It> // 构造函数的类型参数
+		Blob<T>::Blob(It b, It e);
+```
+
+#### 实例化
+
+```C++
+Blob<int> a2(vi.begin(), vi.end());
+```
 
 
 
@@ -304,14 +340,31 @@ template class vector<Sales_data>;
 
 ### 16.2.1 类型转换与模板类型参数
 
-模板实参推断允许发生的类型转换
+show me the code
 
-- 模板参数是const类型引用, 传入非const类型
+``` C++
+template <typename T> T fobj(T, T);
+template <typename T> T fref(const T&, const T&);
+
+string s1("a value");
+const string s2("another value");
+fobj(s1, s2); // fobj(string, string) const被忽略
+fref(s1, s2); // fref(const string&, const string&) s1 转换为const
+
+int a[10], b[42];
+fobj(a, b); // int* int *
+fref(a,b); // error 
+// a和b是不相同的类型 int (&)[10] 具有10个int类型数组的引用
+```
+
+模板实参推断允许发生的(自动)类型转换只有两种情况
+
+- const
 - 数组和指针
 
 ### 16.2.2 函数模板显式实参
 
-不要为难编译器
+> 显式指定模板参数, 指定从模板列表的第一个开始
 
 ``` cpp
 // T1 cannot be deduced: it doesn't appear in the function parameter list
@@ -322,9 +375,23 @@ auto val3 = sum<long long>(i, lng); // long long sum(int, long)
 
 显式实参是按照声明顺序来的
 
-特别注意 `long long和long double`之间没有逗号表示一种类型
+特别注意 `long long` 是一种类型,  `long double`也是如此
 
 ### 16.2.3 尾置返回类型和类型转换
+
+``` C++
+template <typename It>
+auto fcn(It beg, It end) -> decltype(*beg)
+{
+    // process the range
+    return *beg;  // return a copy of an element from the range
+}
+vector<int> vi = {1,2,3,4,5};
+auto &i = fcn(vi.begin(), vi.end());
+// 所有迭代器返回的都是元素的引用
+```
+
+类型转换 : 想要返回一个元素的值并非引用, 使用标准库的类型转换模板remove_reference
 
 ``` cpp
 template <typename It>
@@ -334,17 +401,111 @@ auto fcn2(It beg, It end) ->
     // process the range
     return *beg;  // return a copy of an element from the range
 }
+// Note type是一个类的成员, 该类依赖于模板, 所有要加typename
 ```
 
+`type`是模板类`remove_reference`的一个public的数据成员, 表示模板类中参数类型去引用后的类型(也就是尖括号内类型去引用后的类型)
+
+`remove_reference`是标准库中的头文件`type_traits`中的函数
 
 
 
+### 16.2.5 模板实参推断和引用
 
+``` C++
+template <typename T> void f3(T &&);
+f3(42); // 42本来就是一个右值
+f3(i); // ???
+```
 
+`C++`允许的例外, 满足以下两个条件
 
+- 将一个左值如(i)传递给函数的右值引用参数 
+- 右值引用参数指向模板类型参数 (`T&&`)
 
+编译器推断模板类型参数为实参的左值引用类型
 
+结论: `f3(i)=>T=>int&`
 
+> 编译器推断模板类型参数是实参的左值引用, 因此`f3(i)`, 编译器推断`T`的类型为`int &`
+
+- `X& &`  `X& &&` `X&& &`都折叠成类型 `X&`
+- `X&& &&`折叠成类型`X &&`
+
+### 16.2.6 理解std::move
+
+``` C++
+string s3(std::move(s2));
+```
+
+`move`常用于移动构造代码中, 作用就是不管是左值引用还是右值引用, 都返回右值引用, 这样就可以调用移动构造函数了
+
+``` C++
+  template<typename _Tp>
+    constexpr typename std::remove_reference<_Tp>::type&&
+    move(_Tp&& __t) noexcept
+    { return static_cast<typename std::remove_reference<_Tp>::type&&>(__t); }
+```
+
+第一行是函数模板列表, 只有一个模板参数`_Tp`
+第二行是模板函数的返回值类型, 因为type的模板类的成员函数, 所有在最前面要加上`typename`, 返回的类型是`_Tp`去引用后的右值引用
+第三行是函数的声明, 参数只有一个
+第四行是函数的实现 : 通过引用折叠将`__t`转换成一个`_Tp`的右值引用类型. 
+
+### 16.2.6 转发
+
+将一个或者多个实参连同类型不变地转发给其他函数. (包括const 实参的左值还是右值)
+
+``` C++
+template <typename F, typename T1, typename T2>
+void filp1(F f, T1 t1, T2 t2) {
+	f(t2, t1);
+}
+```
+
+如果f的参数是引用
+
+``` C++
+// 是会影响v2的值的
+void f(int v1, int &v2) {
+    cout << v1 << " " << ++v2 << endl;
+}
+```
+
+当通过函数模板调用时
+
+``` C++
+filp1(f, j, 42);
+// flip1( void(*fcn)(int, int&), int t1, int t2);
+```
+
+发生了拷贝, `t1`是`j`的拷贝, 函数体内是不会影响到`t1`的
+
+``` C++
+// 通过将一个函数参数定义成指向模板类型参数的右值引用
+// 可以保持其对用实参的所有信息
+
+// 1. 引用参数保持const属性(const在引用中都是底层的)
+// 2. 通过引用折叠实现翻转实参是左右值属性
+
+// T1 int & 
+// T1 && => int& && => int&
+template <typename F, typename T1, typename T2>
+void filp2(F f, T1 &&t1, T2 &&t2) {
+	f(t2, t1);
+}
+```
+
+#### std::forward保持类型信息
+
+保持实参的左右值属性
+
+``` C++
+template <typename F, typename T1, typename T2>
+void filp1(F f, T1 &&t1, T2 &&t2) {
+	f(std::forward<T2>(t2), std::forword<T1>(t1);
+}
+```
 
 
 
