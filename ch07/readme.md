@@ -262,16 +262,81 @@ void X::h() {return f();}	//正确
 构造函数中的冒号是让成员变量初始化, 而函数体内部是定义后赋值
 
 ## 7.6 类的静态成员
-
-声明：静态成员没有this指针，也就没有const限制（const是限制this指针的）
-
-访问：类作用域或者类的对象
-
-定义：不能重复使用static
-
-初始化：必须在类外部初始化
-
-区别：静态数据成员可以是不完全类型、
+Account类可能需要一个属于类的成员: 利率
 
 
+### 声明static成员
+``` C++
+class Account {
+public:
+    void calculate() { amount += amount * interestRate; }
+    static double rate() { return interestRate; }
+    static void rate(double);
+private:
+    std::string owner;
+    double amount;
+    static double interestRate;
+    static double initRate();
+};
+```
+每个对象包含两个数据成员`owner`和`amount`, 只有一个`interestRate`被全部的`Accout`对象共享
+同样, 静态成员函数没有绑定到任何对象, 没有this指针, 所以static成员函数不能修饰成`const`, 也不能在static成员函数体内使用this指针
 
+### 访问static成员
+``` C++
+double r = Account::rate(); // 通过作用域
+Account ac1;            
+Account *ac2 = &ac1;    
+r = ac1.rate();             // 通过对象
+r = ac2->rate();            // 通过指针
+```
+
+### 定义static成员
+成员函数 : 和普通函数一样, static成员函数既可以定义在类内部, 也可以定义在外部
+成员变量 : 因为static成员变量不属于某个对象, 一般类内的static成员初始化不在类内
+``` C++
+// define and initialize a static class member
+double Account::interestRate = initRate();
+```
+除非...
+静态成员是常量, 就可以定义在class内部
+``` C++
+class Account {
+public:
+    static double rate() { return interestRate; }
+    static void rate(double);
+private:
+    static constexpr int period = 30;// period is a constant expression
+    double daily_tbl[period];
+};
+```
+值得注意的是, 如果将Accout::period传递给一个参数是`const int&`的函数, period一定要定义, 所以即使静态成员变量类内初始化, 也最好要类为定义
+``` C++
+// definition of a static member with no initializer
+constexpr int Account::period; // initializer provided in the class definition
+```
+
+#### 静态成员可以以普通成员无法使用的方式使用
+1. 静态数据成员可以是不完整类型
+``` C++
+class Bar {
+public:
+    // ...
+private:
+    static Bar mem1; // ok: static member can have incomplete type
+    Bar *mem2;       // ok: pointer member can have incomplete type
+    Bar mem3;        // error: data members must have complete type
+};
+```
+
+2. 可以使用一个静态成员最为默认参数
+``` C++
+class Screen {
+public:
+    // bkground refers to the static member
+    // declared later in the class definition
+    Screen& clear(char = bkground);
+private:
+    static const char bkground;
+};
+```
